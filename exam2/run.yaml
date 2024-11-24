@@ -1,0 +1,19 @@
+# apply strict TSL for whole cluster
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "default"
+  namespace: "istio-system" # get applied mesh wide
+spec:
+  mtls:
+    mode: STRICT  # do not accept any non TSL traffic
+    
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "default1"
+  namespace: "istio-system" # get applied mesh wide
+spec:
+  mtls:
+    mode: STRICT  # do not accept any non TSL traffic

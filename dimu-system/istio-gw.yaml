@@ -1,0 +1,61 @@
+# create GW resource. this is a mapping of external hosts to an app / port
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: istio-gw
+  namespace: istio-system
+spec:
+  selector:
+    app: istio-ingressgateway
+  servers:
+    - port:
+        number: 8080
+        name: http
+        protocol: HTTP
+      hosts:
+        - ui.service
+        - pay.service
+
+#vs to map hosts supported on the gw to other services#
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: ui-service-gw-vs
+spec:
+  hosts:
+    - ui.service
+  gateways:
+    - istio-system/istio-gw
+  http:
+    - route:
+        - destination:
+            host: ui-service
+  #          weight : 50
+  #        - destination:
+  #            host: pay-service
+  #          weight : 50
+      fault:
+        abort:
+          percentage:
+             value: 1
+          httpStatus: 400
+  #      delay:
+  #        percentage:
+ #           value: 100
+ #         fixedDelay: 1s
+---
+
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: pay-service-gw-vs
+spec:
+  hosts:
+    - pay.service
+  gateways:
+    - istio-system/istio-gw
+  http:
+    - route:
+        - destination:
+            host: pay-service

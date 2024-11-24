@@ -1,0 +1,43 @@
+### 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ui-service
+  labels:
+    app: ui-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ui-service
+  template:
+    metadata:
+      labels:
+        app: ui-service
+    spec:
+      containers:
+        - name: nginx
+          imagePullPolicy: IfNotPresent
+          image: ui_app
+          command: ["nginx", "-g", "daemon off;"]
+          ports:
+            - containerPort: 80
+          lifecycle:
+            postStart:
+              exec:
+               command: ["/bin/sh", "-c", "/app/app.sh"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ui-service
+  name: ui-service
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: ui-service
+  sessionAffinity: None

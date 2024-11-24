@@ -1,0 +1,64 @@
+#egress 
+    # external traffic mode - allow/block traffic
+        #  kubectl get istiooperator installed-state -n istio-system -o jsonpath='{.spec.meshConfig.outboundTrafficPolicy.mode}'
+
+    # to add the external service as a monitoring 
+
+    # Standard Scenario all traffic directly goes from pxoy to the external serviec
+        # can configure a egress gateway --> to route traffic via a central place
+
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: httpbin-ext
+spec:
+  hosts:
+  - httpbin.org
+  ports:
+  - number: 80
+    name: http
+    protocol: HTTP
+  resolution: DNS
+  location: MESH_EXTERNAL
+
+--- # Service Entry is just only a regisration saying it is possibel to access this endpoint
+    # this is kind of opposit of the gateway object ( since gateway is for ingress)
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: google
+spec:
+  hosts:
+  - www.google.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  resolution: DNS
+  location: MESH_EXTERNAL
+
+--- #now define the behavior of the endpoint
+    # ex: adding a timeout. 
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: httpbin-ext
+spec:
+  hosts:
+    - httpbin.org
+  http:
+  - timeout: 3s
+    route:
+      - destination:
+          host: httpbin.org
+        weight: 100
+
+# disabling the proxy action for all the traffic except a cettian range. Include only the cluster IP range.
+# here the proxy interrup traffic that goes to mentioned IP range
+    # istioctl install --set values.global.proxy.includeIPRanges="10.0.0.1/24" 
+    
+
+
+
+

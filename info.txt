@@ -1,0 +1,9 @@
+Data Plane
+        #istio injects proxies into each pod. => data plane
+
+Control Plane
+        # tehre is a centrally running istiod pod - control plane (istio used to be called as Pilot)
+             # other optional pods
+                 Kiali UI
+
+

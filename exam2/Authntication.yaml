@@ -1,0 +1,4 @@
+# istio sidecar to side car is by default TLS encrypted
+
+# istio sidecar to non prod, TSL ( Authentication ) can be configured for TSL/ or not
+

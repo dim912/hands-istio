@@ -1,0 +1,43 @@
+  http://127.0.0.1:63007
+    http://127.0.0.1:63008
+    http://127.0.0.1:63009
+    http://127.0.0.1:63010
+    http://127.0.0.1:63011
+    http://127.0.0.1:63012
+    http://127.0.0.1:63013
+
+
+
+  apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: tcpecho-dr
+spec:
+  host: tcp-echo
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+
+---
+
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: tcptraffic
+spec:
+  hosts:
+  - tcp-echo
+  tcp:
+  - match:
+    - port: 9000
+    route:
+    - destination:
+        host: tcp-echo
+        subset: v1
+        port:
+          number: 9001
+      weight: 100

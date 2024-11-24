@@ -1,0 +1,42 @@
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: ratings-dr
+spec:
+  host: ratings
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2
+    - name: v3
+      labels:
+        version: v3
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - match:
+    - headers:
+        end-user:
+          exact: jason
+    fault:
+      abort:
+        httpStatus: 500
+        percentage:
+          value: 100
+    route:
+      - destination:
+          host: ratings
+          subset: v1
+  - route:
+    - destination:
+        host: ratings
+        subset: v1

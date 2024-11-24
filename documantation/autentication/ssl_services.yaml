@@ -1,0 +1,26 @@
+#gets apply run time. Do not need to restart the pods
+
+# all pods to accept only TSL traffic
+# wihtuot this pods supports non tls traffic still.
+# normally proxy to proxy traffic is always TSL encripted
+
+
+#this makes all outgoing traffic frm proxys to apply mutual TLS
+# apply TSL for all traffic receeived by the proxies
+
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "default"
+#  namespace: "istio-system" #must apply on root ns to apply it evereyhwere
+  namespace: "bar" # apply the struckt only for foo ns
+
+spec: #must not have a selector
+  selector:
+    matchLabels:
+      app: httpbin #only for the this label
+  portLevelMtls:
+    80:
+      mode: DISABLE
+  mtls:  
+    mode: STRICT

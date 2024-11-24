@@ -1,0 +1,114 @@
+
+# principel is set to : source.principal
+
+# updates are sync to proxies realtime
+
+# apply strict TSL for whole cluster
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "default"
+  namespace: "istio-system" # get applied mesh wide
+spec:
+  mtls:
+    mode: STRICT  # do not accept any non TSL trafficl Default is PERMISSIVE
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "default1"
+  namespace: "istio-system" # get applied mesh wide
+spec:
+  mtls:
+    mode: STRICT  # do not accept any non TSL traffic
+
+# enable strict only for foo namespace
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "default"
+  namespace: "foo"
+spec:
+  mtls:
+    mode: STRICT
+
+# enanle TSL only for a namespace / selected pods (ex : all paymnet related pdos)
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "httpbin"
+  namespace: "bar"
+spec:
+  selector:
+    matchLabels:
+      app: payment
+  mtls:
+    mode: STRICT
+
+
+# enable TLS except a perticular port
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "httpbin"
+  namespace: "bar"          # precedence after workload selector
+spec:
+  selector:             # top precedence
+    matchLabels:        
+      app: httpbin
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    80:
+      mode: DISABLE
+
+
+---
+
+#disbale authnticaiton only for a single port
+
+# STRICT at the namespace level
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "example-policy"
+  namespace: "foo"
+spec:
+  mtls:
+    mode: STRICT
+
+# DISBALED at the port level
+
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: "example-workload-policy"
+  namespace: "foo"
+spec:
+  selector:
+     matchLabels:
+       app: example-app
+  portLevelMtls:
+    80:                 # here 80 must be a target port for a service
+      mode: DISABLE
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-service
+  namespace: foo
+spec:
+  ports:
+  - name: http
+    port: 8000
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: example-app
+
+
+
+

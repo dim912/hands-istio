@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2024-10-17T18:14:35Z"
+  labels:
+    app: nginx
+  name: dimu-app
+  namespace: default
+  resourceVersion: "38637"
+  uid: 747caf54-c7fd-40f8-b7e3-9e29d4da900a
+spec:
+  clusterIP: 10.105.212.204
+  clusterIPs:
+  - 10.105.212.204
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - nodePort: 30443
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}

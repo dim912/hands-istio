@@ -1,0 +1,20 @@
+
+# Sidecar               -> define between which sidecards the traffic can flow 
+# ServiceEntry / egress -> how to flow traffic outside the mesh
+# PeerAuthorizastion    -> TLS encription between traffic from sidcars to non istion apps (Peer Enciprion)
+#     # mode STRICT     -> must be encripted
+#     # allowes only one mesh wide policy ( takes the oldest)
+#     # allowes only one namespace wide policy ( take the oldest)
+#     # preseeedence top to bottom
+#     # workload specific -> namespace wide -> mesh wide
+#     # best practice is => avoid multiple mesh wide / namespace wide policies per mesh, per namespace
+# RequestAuthntication  -> extracts the auth pricipels from incoming token.s (Does not block anything)
+# AuthorizationPolicy   -> apply ALLOW / DENY policies based on the auth details
+#         -> evaluate precedence order --> CUSTOM DENY > DENY > ALLOW                
+# 
+# 
+#
+
+
+
+

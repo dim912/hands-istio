@@ -1,0 +1,281 @@
+
+# deny by default applies --> only if workload has at least one authorizsatioon policy with ALLOW
+
+#allow nothing
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-nothing
+  namespace: default #apple to whole defualt ns. since there is no workload selector
+spec:
+  {}
+
+
+# allow access to GET method of productpage workload
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: "productpage-viewer"
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: productpage
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        methods: ["GET"]
+
+
+# allow all GET traffict to pricipls cluster.local/ns/default/sa/bookinfo-productpage
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: "details-viewer"
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: details
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/default/sa/bookinfo-productpage"] #service account
+    to:
+    - operation:
+        methods: ["GET"]
+
+
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+ name: httpbin
+ namespace: foo
+spec:
+ selector:
+   matchLabels:
+     app: httpbin
+     version: v1
+ action: ALLOW
+ rules:
+ - from:
+   - source:
+       principals: ["cluster.local/ns/default/sa/sleep"]
+   - source:
+       namespaces: ["dev"]
+   to:
+   - operation:
+       methods: ["GET"]
+   when:
+   - key: request.auth.claims[iss]
+     values: ["https://accounts.google.com"]
+
+---
+
+# Deny when not the namespace foo
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+ name: httpbin-deny
+ namespace: foo
+spec:
+ selector:
+   matchLabels:
+     app: httpbin
+     version: v1
+ action: DENY
+ rules:
+ - from:
+   - source:
+       notNamespaces: ["foo"]
+
+# key under when, ipBlock under surce, ports under to -> only supports exact match
+
+# allow path with test.. and ...info
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: tester
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: products
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        paths: ["/test/*", "*/info"]
+
+---
+
+# allow everything but healthz
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: disable-jwt-for-healthz
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: products
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        notPaths: ["/healthz"]
+    from:
+    - source:
+        requestPrincipals: ["*"] #valid authntication tries to access anything  but healthz -> allow
+
+
+---
+
+#if no requst principle deny
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: enable-jwt-for-admin
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: products
+  action: DENY
+  rules:
+  - to:
+    - operation:
+        paths: ["/admin"]
+    from:
+    - source:
+        notRequestPrincipals: ["*"]
+
+
+# allow nothing
+
+---
+
+apiVersion: security.istio.io/v1 
+kind: AuthorizationPolicy
+metadata:
+  name: allow-nothing
+spec:
+  action: ALLOW # this force default deny accorss the mesh
+  # the rules field is not specified, and the policy will never match.
+  
+
+#deny all
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-all
+spec:
+  action: DENY
+  # the rules field has an empty rule, and the policy will always match.
+  rules:
+  - {}
+
+# allow all
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-all
+spec:
+  action: ALLOW
+  # This matches everything.
+  rules:
+  - {}
+
+
+# custom condition
+
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+ name: httpbin
+ namespace: foo
+spec:
+ selector:
+   matchLabels:
+     app: httpbin
+     version: v1
+ action: ALLOW
+ rules:
+ - from:
+   - source:
+       principals: ["cluster.local/ns/default/sa/sleep"]
+   to:
+   - operation:
+       methods: ["GET"]
+   when:
+   - key: request.headers[version] # check the version
+     values: ["v1", "v2"]
+
+
+---
+# allow all GET post from any source
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+ name: httpbin
+ namespace: foo
+spec:
+ selector:
+   matchLabels:
+     app: httpbin
+     version: v1
+ action: ALLOW
+ rules:
+ - to:
+   - operation:
+       methods: ["GET", "POST"]
+
+---
+# allow GET, POST for all authnticated users
+
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+ name: httpbin
+ namespace: foo
+spec:
+ selector:
+   matchLabels:
+     app: httpbin
+     version: v1
+ action: ALLOW
+ rules:
+ - from:
+   - source:
+       principals: ["*"]
+   to:
+   - operation:
+       methods: ["GET", "POST"]
+
+---
+
+# TCP mongo DB
+
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+ name: httpbin
+ namespace: foo
+spec:
+ selector:
+   matchLabels:
+     app: httpbin
+     version: v1
+ action: ALLOW
+ rules:
+ - from:
+   - source:
+      principals: ["*"] #MTLS must be enabled to use this field
+   to:
+   - operation:
+       methods: ["GET", "POST"]
+
+

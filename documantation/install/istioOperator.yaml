@@ -1,0 +1,19 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istio-with-extra-ports
+spec:
+  profile: demo
+#  meshConfig:
+#   outboundTrafficPolicy:
+#      mode: REGISTRY_ONLY
+#  values:
+#   global:
+#     proxy:
+#      includeIPRanges: "10.96.0.0/12"
+  components:
+    egressGateways:
+       - enabled: true
+    ingressGateways:
+      - namespace: istio-system
+        name: istio-ingressgateway

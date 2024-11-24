@@ -1,0 +1,74 @@
+### 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pay-service-v1
+  labels:
+    app: pay-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pay-service
+      version: v1
+  template:
+    metadata:
+      labels:
+        version: v1
+        app: pay-service
+    spec:
+      containers:
+        - name: nginx
+          image: pay_app
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "/app/app.sh"]
+---
+###
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pay-service-v2
+  labels:
+    app: pay-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pay-service
+      version: v2
+  template:
+    metadata:
+      labels:
+        version: v2
+        app: pay-service
+    spec:
+      containers:
+        - name: nginx
+          image: pay_app
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "/app/app.sh"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: pay-service
+  name: pay-service
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: pay-service
+  sessionAffinity: None
