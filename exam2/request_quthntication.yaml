@@ -1,6 +1,6 @@
 # if no token -> then no validation. only if there is an token, it gets valiated
 
-# specicy valies needed to validate a JSON web token  (JWT)
+# specicy values needed to validate a JSON web token  (JWT)
    ## location of the token in request
    ## issueer of the reqeust
    ## JWT key set ( JWKS )

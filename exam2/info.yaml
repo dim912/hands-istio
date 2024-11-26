@@ -1,7 +1,7 @@
 
 # Sidecar               -> define between which sidecards the traffic can flow 
 # ServiceEntry / egress -> how to flow traffic outside the mesh
-# PeerAuthorizastion    -> TLS encription between traffic from sidcars to non istion apps (Peer Enciprion)
+# PeerAuthentication    -> TLS encription between traffic from sidcars to non istion apps (Peer Enciprion)
 #     # mode STRICT     -> must be encripted
 #     # allowes only one mesh wide policy ( takes the oldest)
 #     # allowes only one namespace wide policy ( take the oldest)
